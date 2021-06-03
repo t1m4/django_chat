@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'django.contrib.messages',
     'django.contrib.staticfiles',
     'login',
+    'chat',
 ]
 
 MIDDLEWARE = [
@@ -138,3 +139,4 @@ EMAIL_USE_TLS = True
 
 # Google ReCaptcha config
 GOOGLE_RECAPTCHA_SECRET_KEY = env.str("GOOGLE_RECAPTCHA_SECRET_KEY")
+LOGIN_URL = '/accounts/async_login/'

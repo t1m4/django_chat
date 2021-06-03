@@ -21,6 +21,6 @@ from login import auth_views
 
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('accounts/', include('django.contrib.auth.urls')),
+    path('accounts/', include('login.urls')),
     path('', include('chat.urls')),
 ]
