@@ -10,12 +10,12 @@ from django.shortcuts import render
 from django.utils.functional import cached_property
 from django.views import View
 
-from login.auth_views import AsyncView, MyLoginRequiredMixin
+from login.auth_views import AsyncView, AsyncLoginRequiredMixin
 
 
-class IndexView(MyLoginRequiredMixin):
+class IndexView(AsyncLoginRequiredMixin):
     template_name = 'chat/html/index.html'
     context = {}
 
-    def get(self, request, *args, **kwargs):
+    async def get(self, request, *args, **kwargs):
         return render(request, self.template_name, context=self.context)

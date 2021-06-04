@@ -4,10 +4,10 @@ from django.http import HttpResponse, JsonResponse
 from rest_framework.response import Response
 
 from chat.serializers import UserSerializer
-from login.auth_views import AsyncView, MyLoginRequiredMixin
+from login.auth_views import AsyncView, AsyncLoginRequiredMixin
 
 
-class UserView(MyLoginRequiredMixin):
+class UserView(AsyncLoginRequiredMixin):
     result = {'status': 'ok', 'users': []}
     async def get(self, request, *args, **kwargs):
         try:

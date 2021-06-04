@@ -29,7 +29,7 @@ class AsyncView(View):
         return view
 
 
-class MyLoginRequiredMixin(AsyncView):
+class AsyncLoginRequiredMixin(AsyncView):
     """
     Check that user is logged in account. If not logged in then redirect to login page else pass to destination
     """
@@ -40,7 +40,7 @@ class MyLoginRequiredMixin(AsyncView):
         if not await self.get_user_is_authenticated(request):
             # redirect to login page with params next
             return redirect_to_login(self.request.get_full_path(), self.login_url, self.redirect_field_name)
-        return super().dispatch(request, *args, **kwargs)
+        return await super().dispatch(request, *args, **kwargs)
 
     @sync_to_async()
     def get_user_is_authenticated(self, request):
@@ -50,7 +50,7 @@ class MyLoginRequiredMixin(AsyncView):
         return request.user.is_authenticated
 
 
-class IndexView(MyLoginRequiredMixin):
+class IndexView(AsyncLoginRequiredMixin):
     """
     View for main info
     """
