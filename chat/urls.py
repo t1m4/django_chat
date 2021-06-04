@@ -1,7 +1,12 @@
 from django.urls import path
 
-from chat import views
+from chat import views, api_views
 
 urlpatterns = [
     path('', views.IndexView.as_view(), name='chat-index'),
+]
+
+# api vies
+urlpatterns += [
+    path('api/users/', api_views.UserView.as_view(), name='rest_api-users'),
 ]

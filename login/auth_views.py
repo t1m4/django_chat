@@ -40,7 +40,7 @@ class MyLoginRequiredMixin(AsyncView):
         if not await self.get_user_is_authenticated(request):
             # redirect to login page with params next
             return redirect_to_login(self.request.get_full_path(), self.login_url, self.redirect_field_name)
-        return await super().dispatch(request, *args, **kwargs)
+        return super().dispatch(request, *args, **kwargs)
 
     @sync_to_async()
     def get_user_is_authenticated(self, request):
@@ -189,7 +189,7 @@ class MyLoginView(AsyncView):
     """
     form_class = LoginForm
     redirect_field_name = REDIRECT_FIELD_NAME
-    success_url = 'login-index'
+    success_url = 'chat-index'
     template_name = 'registration/login.html'
 
     # You can enable two factor email authentication
