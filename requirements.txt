@@ -12,3 +12,6 @@ uvicorn
 
 # Django REST
 djangorestframework
+
+# Chat
+channels
