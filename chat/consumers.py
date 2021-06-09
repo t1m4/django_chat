@@ -1,4 +1,5 @@
 import asyncio
+import datetime
 import json
 from asgiref.sync import async_to_sync
 from channels.consumer import AsyncConsumer
@@ -12,7 +13,6 @@ from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 class TradingConsumer(AsyncConsumer):
     async def websocket_connect(self, event):
         self.i = 0
-        print(event)
         await self.send({
             "type": "websocket.accept"
         })
@@ -35,45 +35,46 @@ class TradingConsumer(AsyncConsumer):
 
 
 class ChatConsumer(AsyncWebsocketConsumer):
-    admin = False
 
     async def connect(self):
         if self.scope['user'].is_authenticated:
-            get_string = self.scope['query_string'].decode('utf-8')
-            get_string = get_string.split('&')
-            get_string_id = get_string[0].split('=')
-            if get_string_id[0] == 'id':
-                self.admin = True
-                self.user = await self.get_client(int(get_string_id[1]))
-                self.room_group_name = 'chat_%s' % self.user.get_login()
-                self.chat = await self.create_chat(self.user)
-                # await self.print(self.user, self.room_group_name, self.chat)
-
-                # Join room group
-                await self.channel_layer.group_add(
-                    self.room_group_name,
-                    self.channel_name
-                )
-            await self.accept()
-        else:
-            self.user = await self.get_client(self.scope['session']['client_id'])
-            print(self.user)
-            self.room_group_name = 'chat_%s' % self.user.get_login()
-            self.chat = await self.create_chat(self.user)
-            # await self.print(self.chat)
-            # Join room group
-            await self.channel_layer.group_add(
-                self.room_group_name,
-                self.channel_name
-            )
-            await self.accept()
+            await self.update_user(self.scope['user'])
+            print(self.scope['user'])
+        #     get_string = self.scope['query_string'].decode('utf-8')
+        #     get_string = get_string.split('&')
+        #     get_string_id = get_string[0].split('=')
+        #     if get_string_id[0] == 'id':
+        #         self.admin = True
+        #         self.user = await self.get_client(int(get_string_id[1]))
+        #         self.room_group_name = 'chat_%s' % self.user.get_login()
+        #         self.chat = await self.create_chat(self.user)
+        #         # await self.print(self.user, self.room_group_name, self.chat)
+        #
+        #         # Join room group
+        #         await self.channel_layer.group_add(
+        #             self.room_group_name,
+        #             self.channel_name
+        #         )
+        #     await self.accept()
+        # else:
+        #     self.user = await self.get_client(self.scope['session']['client_id'])
+        #     print(self.user)
+        #     self.room_group_name = 'chat_%s' % self.user.get_login()
+        #     self.chat = await self.create_chat(self.user)
+        #     # await self.print(self.chat)
+        #     # Join room group
+        #     await self.channel_layer.group_add(
+        #         self.room_group_name,
+        #         self.channel_name
+        #     )
+        #     await self.accept()
     async def disconnect(self, close_code):
         # Leave room group
         print(close_code)
-        await self.channel_layer.group_discard(
-            self.room_group_name,
-            self.channel_name
-        )
+        # await self.channel_layer.group_discard(
+        #     self.room_group_name,
+        #     self.channel_name
+        # )
 
     # Receive message from WebSocket
     async def receive(self, text_data):
@@ -103,17 +104,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
             'message': message
         }))
 
-
     @database_sync_to_async
-    def create_chat(self, user):
-        return Chat.objects.get_or_create(user=user)[0]
-    @database_sync_to_async
-    def create_chat_message(self, chat, message, login):
-        return ChatMessage.objects.create(chat=chat, message=message, login=login)
-    @database_sync_to_async
-    def get_client(self, client_id):
-        return get_object_or_none(Client, pk=client_id)
-    @database_sync_to_async
-    def print(self, *args, **kwargs):
-        return print(args, kwargs)
-
+    def update_user(self, user):
+        user.profile.last_online = datetime.datetime.now()
+        print(user, user.profile.last_online)
+        user.save()
