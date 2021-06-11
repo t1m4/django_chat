@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'login',
     'chat',
     'channels',
+    'debug_toolbar',
 ]
 
 MIDDLEWARE = [
@@ -52,6 +53,7 @@ MIDDLEWARE = [
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'login_system.urls'
@@ -141,3 +143,8 @@ EMAIL_USE_TLS = True
 # Google ReCaptcha config
 GOOGLE_RECAPTCHA_SECRET_KEY = env.str("GOOGLE_RECAPTCHA_SECRET_KEY")
 LOGIN_URL = '/accounts/async_login/'
+
+# Django Debug
+INTERNAL_IPS = [
+    '127.0.0.1',
+]
