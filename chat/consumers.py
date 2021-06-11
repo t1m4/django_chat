@@ -6,33 +6,43 @@ from channels.consumer import AsyncConsumer
 from channels.db import database_sync_to_async
 from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 
+
 # from core.models import Game, Chat, ChatMessage
 # from core.models import Chat, ChatMessage, Client
 # from core.utils import get_object_or_none
+from django.contrib.auth.models import User
+
 
 class TradingConsumer(AsyncConsumer):
     async def websocket_connect(self, event):
         self.i = 0
-        await self.send({
-            "type": "websocket.accept"
-        })
-
-        while True:
-            await asyncio.sleep(0.5)
-
-            # obj = # do_something (Ex: constantly query DB...)
-
+        if self.scope['user'].is_authenticated:
+            await self.update_user(self.scope['user'])
             await self.send({
-                'type': 'websocket.send',
-                'text': '{}'.format(self.i)
+                "type": "websocket.accept"
             })
-            self.i += 1
+            while True:
+                await asyncio.sleep(1)
+                self.i = await self.all_online_users()
+                await self.send({
+                    'type': 'websocket.send',
+                    'text': '{}'.format(self.i)
+                })
+
+
     async def websocket_receive(self, event):
         print("receive", event)
 
     async def websocket_disconnect(self, event):
         print("disconnected", event)
 
+    @database_sync_to_async
+    def update_user(self, user):
+        user.profile.last_online = datetime.datetime.now()
+        user.save()
+    @database_sync_to_async
+    def all_online_users(self):
+        return User.objects.filter(profile__last_online__gte=datetime.datetime.now()-datetime.timedelta(minutes=15)).count()
 
 class ChatConsumer(AsyncWebsocketConsumer):
 
@@ -40,6 +50,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         if self.scope['user'].is_authenticated:
             await self.update_user(self.scope['user'])
             print(self.scope['user'])
+
         #     get_string = self.scope['query_string'].decode('utf-8')
         #     get_string = get_string.split('&')
         #     get_string_id = get_string[0].split('=')
@@ -68,6 +79,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         #         self.channel_name
         #     )
         #     await self.accept()
+
     async def disconnect(self, close_code):
         # Leave room group
         print(close_code)
@@ -91,7 +103,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': user_login +  ': ' + message
+                'message': user_login + ': ' + message
             }
         )
 
@@ -107,5 +119,4 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def update_user(self, user):
         user.profile.last_online = datetime.datetime.now()
-        print(user, user.profile.last_online)
         user.save()
