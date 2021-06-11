@@ -96,8 +96,7 @@ class MyRegisterView(AsyncView):
         self.context['form'] = form
         if self.recaptcha_enabled:
             self.context['recaptcha_enabled'] = True
-
-        return render(request, self.template_name, self.context)
+        return await sync_to_async(render)(request, self.template_name, self.context)
 
     async def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
@@ -208,8 +207,7 @@ class MyLoginView(AsyncView):
         self.context['form'] = form
         if self.recaptcha_enabled:
             self.context['recaptcha_enabled'] = True
-
-        return render(request, self.template_name, self.context)
+        return await sync_to_async(render)(request, self.template_name, self.context)
 
     async def post(self, request, *args, **kwargs):
         form = self.form_class(request.POST)
@@ -286,7 +284,7 @@ class TwoFactorAuthentication(AsyncView):
         if await self.check_session(request):
             form = self.form_class()
             self.context['form'] = form
-            return render(request, self.template_name, self.context)
+            return await sync_to_async(render)(request, self.template_name, self.context)
         else:
             return HttpResponse('Not Found', status=404)
 
