@@ -26,6 +26,8 @@ class Chat(models.Model):
     user_one = models.ForeignKey(User, on_delete=models.PROTECT, related_name='chat_one', )
     user_two = models.ForeignKey(User, on_delete=models.PROTECT, related_name='chat_two', )
 
+    class Meta:
+        unique_together = ('user_one', 'user_two',)
     def __str__(self):
         return "{}-{}".format(self.user_one, self.user_two)
 
