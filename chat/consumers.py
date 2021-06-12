@@ -11,6 +11,10 @@ from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 # from core.models import Chat, ChatMessage, Client
 # from core.utils import get_object_or_none
 from django.contrib.auth.models import User
+from django.db.models import Q
+
+from chat.models import Chat
+from login.tools import get_object_or_none
 
 
 class TradingConsumer(AsyncConsumer):
@@ -48,14 +52,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         if self.scope['user'].is_authenticated:
             await self.update_user(self.scope['user'])
-
+            chat_id = self.scope['url_route']['kwargs'].get('id')
+            user_two = await get_object_or_none(User, id=chat_id)
+            print(user_two)
             print(self.scope['user'])
-
-        #     get_string = self.scope['query_string'].decode('utf-8')
-        #     get_string = get_string.split('&')
-        #     get_string_id = get_string[0].split('=')
-        #     if get_string_id[0] == 'id':
-        #         self.admin = True
+            await self.get_or_create(self.scope['user'], user_two)
         #         self.user = await self.get_client(int(get_string_id[1]))
         #         self.room_group_name = 'chat_%s' % self.user.get_login()
         #         self.chat = await self.create_chat(self.user)
@@ -121,3 +122,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     def update_user(self, user):
         user.profile.last_online = datetime.datetime.now()
         user.save()
+
+    @database_sync_to_async
+    def get_or_create(self, u1, u2):
+        chat = Chat.objects.filter(Q(user_one=u1) & Q(user_two=u2) | Q(user_one=u2) & Q(user_two=u1))
+        print(chat)
