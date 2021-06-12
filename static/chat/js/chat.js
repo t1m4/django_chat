@@ -1,4 +1,13 @@
 (function () {
+    var template = document.querySelector("template").content;
+    var chat_messages = document.querySelector(".chat_messages");
+    var first_child = document.querySelector(".first_child");
+    var create_message = function (element) {
+        var operation_element = template.cloneNode(true);
+        var message = operation_element.querySelector('.message')
+        message.textContent = element.username + ": " + element.message + '\n'
+        return operation_element
+    }
     const chat_id = JSON.parse(document.getElementById('chat-id').textContent);
     const chatSocket = new WebSocket(
         'ws://'
@@ -8,9 +17,18 @@
         + "/"
     );
 
+    function insertAfter(newNode, existingNode) {
+        existingNode.parentNode.insertBefore(newNode, existingNode.nextSibling);
+    }
+
     chatSocket.onmessage = function (e) {
         const data = JSON.parse(e.data);
-        document.querySelector('#chat-log').value += (data.username + ": " + data.message + "\n")
+        // document.querySelector('#chat-log').value += (data.username + ": " + data.message + "\n")
+        var fragment = document.createDocumentFragment();
+        fragment.appendChild(create_message(data))
+        // chat_messages.appendChild(fragment)
+        // chat_messages.insertAfter(fragment, first_child)
+        insertAfter(fragment, first_child)
     };
 
     chatSocket.onclose = function (e) {

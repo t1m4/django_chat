@@ -1,13 +1,16 @@
 {% extends 'base.html' %}
 {% load static %}
 {% block content %}
-    <div class="messages"><p class="username message">Ruslan: Hello</p></div>
-    <div class="messages"><p class="username message">Ruslan: Hello</p></div>
-    <div class="messages"><p class="username message">Ruslan: Hello</p></div>
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
+
     <input id="chat-message-input" type="text" size="100"><br>
     <input id="chat-message-submit" type="button" value="Send">
+    <div class="chat_messages">
+        <div class="first_child"></div>
+    </div>
     {{ id|json_script:"chat-id" }}
+    <template>
+        <div class="messages"><p class="username message">Ruslan: Hello</p></div>
+    </template>
 {% endblock %}
 {% block scripts %}
     <script type="text/javascript" src="{% static 'chat/js/websocket.js' %}"></script>

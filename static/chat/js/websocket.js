@@ -6,7 +6,7 @@
     );
 
     chatSocket.onmessage = function (e) {
-        document.querySelector('.value').textContent = (e.data);
+        // document.querySelector('.value').textContent = (e.data);
         document.querySelector('.users').textContent = (e.data);
     };
 
