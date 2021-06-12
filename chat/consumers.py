@@ -54,32 +54,16 @@ class ChatConsumer(AsyncWebsocketConsumer):
             await self.update_user(self.scope['user'])
             chat_id = self.scope['url_route']['kwargs'].get('id')
             user_two = await get_object_or_none(User, id=chat_id)
-            print(user_two)
-            print(self.scope['user'])
-            await self.get_or_create(self.scope['user'], user_two)
-        #         self.user = await self.get_client(int(get_string_id[1]))
-        #         self.room_group_name = 'chat_%s' % self.user.get_login()
-        #         self.chat = await self.create_chat(self.user)
-        #         # await self.print(self.user, self.room_group_name, self.chat)
-        #
-        #         # Join room group
-        #         await self.channel_layer.group_add(
-        #             self.room_group_name,
-        #             self.channel_name
-        #         )
-        #     await self.accept()
+            chat, id = await self.get_or_create(self.scope['user'], user_two)
+            self.room_group_name = 'chat_%i' % id
+            print(self.room_group_name)
+            # Join room group
+            await self.channel_layer.group_add(
+                self.room_group_name,
+                self.channel_name
+            )
         else:
             await self.disconnect(1001)
-        #     self.user = await self.get_client(self.scope['session']['client_id'])
-        #     print(self.user)
-        #     self.room_group_name = 'chat_%s' % self.user.get_login()
-        #     self.chat = await self.create_chat(self.user)
-        #     # await self.print(self.chat)
-        #     # Join room group
-        #     await self.channel_layer.group_add(
-        #         self.room_group_name,
-        #         self.channel_name
-        #     )
         await self.accept()
 
     async def disconnect(self, close_code):
@@ -126,4 +110,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
     @database_sync_to_async
     def get_or_create(self, u1, u2):
         chat = Chat.objects.filter(Q(user_one=u1) & Q(user_two=u2) | Q(user_one=u2) & Q(user_two=u1))
-        print(chat)
+        if chat.count() == 0:
+            chat = Chat.objects.create(user_one=u1, user_two=u2)
+        else:
+            chat = chat[0]
+        return chat, chat.id
