@@ -1,49 +1,9 @@
+{% load static %}
 <!DOCTYPE html>
 <html>
 <head>
     <title>WebSocket demo</title>
-    <style type="text/css">
-        body {
-            font-family: "Courier New", sans-serif;
-            text-align: center;
-        }
-
-        .buttons {
-            font-size: 1em;
-            display: flex;
-            justify-content: center;
-        }
-
-        .button, .value {
-            line-height: 1;
-            padding: 2rem;
-            margin: 2rem;
-            border: medium solid;
-            min-height: 1em;
-            min-width: 1em;
-        }
-
-        .button {
-            cursor: pointer;
-            user-select: none;
-        }
-
-        .minus {
-            color: red;
-        }
-
-        .plus {
-            color: green;
-        }
-
-        .value {
-            min-width: 2em;
-        }
-
-        .state {
-            font-size: 2em;
-        }
-    </style>
+    <link rel="stylesheet" href="{% static "chat/css/index.css"%}">
 </head>
 <body>
 <div class="buttons">
@@ -55,84 +15,17 @@
     <span class="users">?</span> online
 </div>
 <div>
-    <a href="#">
-        <div><p>hello</p></div>
-    </a>
-    <a href="#">
-        <div><p>hello</p></div>
-    </a>
+    {% for i in users %}
+        <a href="#">
+            <div><p>{{ i.username }}</p></div>
+        </a>
+
+    {% endfor %}
     <textarea id="chat-log" cols="100" rows="20"></textarea><br>
     <input id="chat-message-input" type="text" size="100"><br>
     <input id="chat-message-submit" type="button" value="Send">
 </div>
-<script>
-    {#const roomName = JSON.parse(document.getElementById('room-name').textContent);#}
-    const roomName = '123';
-    console.log('ws://'
-        + window.location.host
-        + '/ws/chat/')
-    const chatSocket = new WebSocket(
-        'ws://'
-        + window.location.host
-        + '/ws/chat/'
-    );
-
-    chatSocket.onmessage = function (e) {
-        {#const data = JSON.parse(e.data);#}
-        console.log(e.data)
-        {#document.querySelector('#chat-log').value += (data.message + '\n');#}
-        document.querySelector('.value').textContent = (e.data);
-        document.querySelector('.users').textContent = (e.data);
-    };
-
-    chatSocket.onclose = function (e) {
-        console.error('Chat socket closed unexpectedly');
-    };
-
-    document.querySelector('#chat-message-input').focus();
-    document.querySelector('#chat-message-input').onkeyup = function (e) {
-        if (e.keyCode === 13) {  // enter, return
-            document.querySelector('#chat-message-submit').click();
-        }
-    };
-
-    document.querySelector('#chat-message-submit').onclick = function (e) {
-        const messageInputDom = document.querySelector('#chat-message-input');
-        const message = messageInputDom.value;
-        chatSocket.send(JSON.stringify({
-            'message': message
-        }));
-        messageInputDom.value = '';
-    };
-</script>
-{#        <script>#}
-{#            var minus = document.querySelector('.minus'),#}
-{#                plus = document.querySelector('.plus'),#}
-{#                value = document.querySelector('.value'),#}
-{#                users = document.querySelector('.users'),#}
-{#                websocket = new WebSocket("ws://127.0.0.1:6789/");#}
-{#            minus.onclick = function (event) {#}
-{#                websocket.send(JSON.stringify({action: 'minus'}));#}
-{#            }#}
-{#            plus.onclick = function (event) {#}
-{#                websocket.send(JSON.stringify({action: 'plus'}));#}
-{#            }#}
-{#            websocket.onmessage = function (event) {#}
-{#                data = JSON.parse(event.data);#}
-{#                switch (data.type) {#}
-{#                    case 'state':#}
-{#                        value.textContent = data.value;#}
-{#                        break;#}
-{#                    case 'users':#}
-{#                        users.textContent = (#}
-{#                            data.count.toString() + " user" +#}
-{#                            (data.count == 1 ? "" : "s"));#}
-{#                        break;#}
-{#                    default:#}
-{#                        console.error(#}
-{#                            "unsupported event", data);#}
-{#                }#}
-{#            };#}
-{#        </script>#}
+<script type="text/javascript" src="{% static 'chat/js/websocket.js' %}"></script>
+<script type="text/javascript" src="{% static 'chat/js/users.js' %}"></script>
 </body>
 </html>

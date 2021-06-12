@@ -21,12 +21,12 @@ class TradingConsumer(AsyncConsumer):
                 "type": "websocket.accept"
             })
             while True:
-                await asyncio.sleep(60)
                 i = await self.all_online_users()
                 await self.send({
                     'type': 'websocket.send',
                     'text': '{}'.format(i)
                 })
+                await asyncio.sleep(60)
 
 
     async def websocket_receive(self, event):

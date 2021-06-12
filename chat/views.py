@@ -18,4 +18,9 @@ class IndexView(AsyncLoginRequiredMixin):
     context = {}
 
     async def get(self, request, *args, **kwargs):
-        return render(request, self.template_name, context=self.context)
+        self.context['users'] = await self.get_users(request)
+        return await sync_to_async(render)(request, self.template_name, context=self.context)
+
+    @sync_to_async
+    def get_users(self, request, size: int=10, *args, **kwargs):
+        return User.objects.filter(is_active=True).exclude(id=request.user.id).order_by('-id')[0:size]
