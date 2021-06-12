@@ -13,7 +13,7 @@ from channels.generic.websocket import WebsocketConsumer, AsyncWebsocketConsumer
 from django.contrib.auth.models import User
 from django.db.models import Q
 
-from chat.models import Chat
+from chat.models import Chat, ChatMessage
 from login.tools import get_object_or_none
 
 
@@ -52,11 +52,11 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         if self.scope['user'].is_authenticated:
             await self.update_user(self.scope['user'])
+            self.username = await self.get_username(self.scope['user'])
             chat_id = self.scope['url_route']['kwargs'].get('id')
             user_two = await get_object_or_none(User, id=chat_id)
-            chat, id = await self.get_or_create(self.scope['user'], user_two)
+            self.chat, id = await self.get_or_create(self.scope['user'], user_two)
             self.room_group_name = 'chat_%i' % id
-            print(self.room_group_name)
             # Join room group
             await self.channel_layer.group_add(
                 self.room_group_name,
@@ -68,50 +68,64 @@ class ChatConsumer(AsyncWebsocketConsumer):
 
     async def disconnect(self, close_code):
         # Leave room group
-        print(close_code)
-        # await self.channel_layer.group_discard(
-        #     self.room_group_name,
-        #     self.channel_name
-        # )
+        await self.channel_layer.group_discard(
+            self.room_group_name,
+            self.channel_name,
+        )
 
     # Receive message from WebSocket
     async def receive(self, text_data):
         text_data_json = json.loads(text_data)
         message = text_data_json['message']
-        if self.admin:
-            user_login = self.scope['user'].username
-        else:
-            user_login = self.user.login
-        await self.create_chat_message(self.chat, message, user_login)
-
+        user = self.scope['user']
+        await self.create_chat_message(user, message)
         # Send message to room group
         await self.channel_layer.group_send(
             self.room_group_name,
             {
                 'type': 'chat_message',
-                'message': user_login + ': ' + message
+                'message': message,
+                'username': self.username,
             }
         )
 
     # Receive message from room group
     async def chat_message(self, event):
         message = event['message']
-
+        username = event['username']
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
-            'message': message
+            'message': message,
+            'username': username,
         }))
 
     @database_sync_to_async
     def update_user(self, user):
+        """
+        Update user online time, every times when he connect to server using websocket
+        """
         user.profile.last_online = datetime.datetime.now()
         user.save()
 
     @database_sync_to_async
     def get_or_create(self, u1, u2):
+        """
+        Create Chat using two users
+        """
         chat = Chat.objects.filter(Q(user_one=u1) & Q(user_two=u2) | Q(user_one=u2) & Q(user_two=u1))
         if chat.count() == 0:
             chat = Chat.objects.create(user_one=u1, user_two=u2)
         else:
             chat = chat[0]
         return chat, chat.id
+
+    @database_sync_to_async
+    def create_chat_message(self, user, message):
+        """
+        Create Chat Message
+        """
+        return ChatMessage.objects.create(chat=self.chat, user=user, message=message)
+
+    @database_sync_to_async
+    def get_username(self, user):
+        return user.username
