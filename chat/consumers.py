@@ -15,18 +15,17 @@ from django.contrib.auth.models import User
 
 class TradingConsumer(AsyncConsumer):
     async def websocket_connect(self, event):
-        self.i = 0
         if self.scope['user'].is_authenticated:
             await self.update_user(self.scope['user'])
             await self.send({
                 "type": "websocket.accept"
             })
             while True:
-                await asyncio.sleep(1)
-                self.i = await self.all_online_users()
+                await asyncio.sleep(60)
+                i = await self.all_online_users()
                 await self.send({
                     'type': 'websocket.send',
-                    'text': '{}'.format(self.i)
+                    'text': '{}'.format(i)
                 })
 
 

@@ -15,15 +15,15 @@ class UserView(AsyncLoginRequiredMixin):
         except:
             size = 10
         size = 10 if size > 10 else size
-        users = await self.get_users(size)
+        users = await self.get_users(size, request)
         serializer = UserSerializer(users, many=True)
         data = await self.get_serializer_data(serializer)
         self.result['users'] = data
         return JsonResponse(self.result)
 
     @sync_to_async
-    def get_users(self, size, *args, **kwargs):
-        return User.objects.filter(is_active=True).order_by('-id')[0:size]
+    def get_users(self, size, request, *args, **kwargs):
+        return User.objects.filter(is_active=True).exclude(id=request.user.id).order_by('-id')[0:size]
     @sync_to_async
     def get_serializer_data(self, serializer, *args, **kwargs):
         return serializer.data
