@@ -31,5 +31,5 @@ class UserChatView(AsyncLoginRequiredMixin):
     context = {}
 
     async def get(self, request, id, *args, **kwargs):
-        print(id)
+        self.context['id'] = id
         return await sync_to_async(render)(request, self.template_name, context=self.context)

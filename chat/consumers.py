@@ -48,6 +48,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def connect(self):
         if self.scope['user'].is_authenticated:
             await self.update_user(self.scope['user'])
+
             print(self.scope['user'])
 
         #     get_string = self.scope['query_string'].decode('utf-8')
@@ -66,7 +67,8 @@ class ChatConsumer(AsyncWebsocketConsumer):
         #             self.channel_name
         #         )
         #     await self.accept()
-        # else:
+        else:
+            await self.disconnect(1001)
         #     self.user = await self.get_client(self.scope['session']['client_id'])
         #     print(self.user)
         #     self.room_group_name = 'chat_%s' % self.user.get_login()
@@ -77,7 +79,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
         #         self.room_group_name,
         #         self.channel_name
         #     )
-        #     await self.accept()
+        await self.accept()
 
     async def disconnect(self, close_code):
         # Leave room group
