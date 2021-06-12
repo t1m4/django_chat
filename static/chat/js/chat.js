@@ -5,7 +5,7 @@
     var create_message = function (element) {
         var operation_element = template.cloneNode(true);
         var message = operation_element.querySelector('.message')
-        message.textContent = element.username + ": " + element.message + '\n'
+        message.textContent = element.username + ": " + element.message + '\n' + element.datetime
         return operation_element
     }
     const chat_id = JSON.parse(document.getElementById('chat-id').textContent);
@@ -26,8 +26,6 @@
         // document.querySelector('#chat-log').value += (data.username + ": " + data.message + "\n")
         var fragment = document.createDocumentFragment();
         fragment.appendChild(create_message(data))
-        // chat_messages.appendChild(fragment)
-        // chat_messages.insertAfter(fragment, first_child)
         insertAfter(fragment, first_child)
     };
 

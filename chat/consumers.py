@@ -86,6 +86,7 @@ class ChatConsumer(AsyncWebsocketConsumer):
                 'type': 'chat_message',
                 'message': message,
                 'username': self.username,
+                'date_time': datetime.datetime.now().strftime('%H:%M:%S - %m.%d.%Y'),
             }
         )
 
@@ -93,10 +94,12 @@ class ChatConsumer(AsyncWebsocketConsumer):
     async def chat_message(self, event):
         message = event['message']
         username = event['username']
+        date_time = event['date_time']
         # Send message to WebSocket
         await self.send(text_data=json.dumps({
             'message': message,
             'username': username,
+            'datetime': date_time,
         }))
 
     @database_sync_to_async
