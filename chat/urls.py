@@ -4,6 +4,7 @@ from chat import views, api_views
 
 urlpatterns = [
     path('', views.IndexView.as_view(), name='chat-index'),
+    path('chat/<int:id>/', views.UserChatView.as_view(), name='chat-user_chat'),
 ]
 
 # api vies

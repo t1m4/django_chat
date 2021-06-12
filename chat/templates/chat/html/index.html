@@ -1,31 +1,16 @@
+{% extends 'base.html' %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-<head>
-    <title>WebSocket demo</title>
-    <link rel="stylesheet" href="{% static "chat/css/index.css"%}">
-</head>
-<body>
-<div class="buttons">
-    <div class="minus button">-</div>
-    <div class="value">?</div>
-    <div class="plus button">+</div>
-</div>
-<div class="state">
-    <span class="users">?</span> online
-</div>
-<div>
-    {% for i in users %}
-        <a href="#">
-            <div><p>{{ i.username }}</p></div>
-        </a>
+{% block content %}
+    <div>
+        {% for i in users %}
+            <a href="{% url 'chat-user_chat' id=i.id %}">
+                <div><p>{{ i.username }}</p></div>
+            </a>
 
-    {% endfor %}
-    <textarea id="chat-log" cols="100" rows="20"></textarea><br>
-    <input id="chat-message-input" type="text" size="100"><br>
-    <input id="chat-message-submit" type="button" value="Send">
-</div>
-<script type="text/javascript" src="{% static 'chat/js/websocket.js' %}"></script>
-<script type="text/javascript" src="{% static 'chat/js/users.js' %}"></script>
-</body>
-</html>
+        {% endfor %}
+    </div>
+{% endblock %}
+{% block scripts %}
+    <script type="text/javascript" src="{% static 'chat/js/websocket.js' %}"></script>
+    <script type="text/javascript" src="{% static 'chat/js/users.js' %}"></script>
+{% endblock %}

@@ -22,5 +22,14 @@ class IndexView(AsyncLoginRequiredMixin):
         return await sync_to_async(render)(request, self.template_name, context=self.context)
 
     @sync_to_async
-    def get_users(self, request, size: int=10, *args, **kwargs):
+    def get_users(self, request, size: int = 10, *args, **kwargs):
         return User.objects.filter(is_active=True).exclude(id=request.user.id).order_by('-id')[0:size]
+
+
+class UserChatView(AsyncLoginRequiredMixin):
+    template_name = 'chat/html/chat.html'
+    context = {}
+
+    async def get(self, request, id, *args, **kwargs):
+        print(id)
+        return await sync_to_async(render)(request, self.template_name, context=self.context)
